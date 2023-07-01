@@ -1,8 +1,16 @@
 mod utils;
 
+// extern crate web_sys;
+
 use js_sys::Math;
 use wasm_bindgen::prelude::*;
 use std::fmt;
+
+// macro_rules! log {
+//     ( $ ( $t:tt )* ) => {
+//         web_sys::console::log_1(&format!( $ ( $t )* ).into());
+//     }
+// }
 
 // When the `wee_alloc` feature is enabled, use `wee_alloc` as the global
 // allocator.
@@ -59,6 +67,14 @@ impl Universe {
                 let cell = self.cells[idx];
                 let live_neighbors = self.live_neighbor_count(row, col);
 
+                // log!(
+                //     "cell[{}, {}] is initially {:?} and has {} live neighbors",
+                //     row,
+                //     col,
+                //     cell,
+                //     live_neighbors
+                // );
+
                 let next_cell = match (cell, live_neighbors) {
                     // Rule 1: Any live cell with fewer than two live neighbors
                     // dies, as if caused by underpopulation.
@@ -76,6 +92,11 @@ impl Universe {
                     (otherwise, _) => otherwise,
                 };
 
+                // log!("    it becomes {:?}", next_cell);
+                // if cell != next_cell {
+                //     log!("Cell changed state at [{}, {}]", row, col);
+                // };
+
                 next[idx] = next_cell;
             }
         }
@@ -84,11 +105,13 @@ impl Universe {
     }
 
     pub fn new() -> Universe {
+        utils::set_panic_hook();
+
         let width = 64;
         let height = 64;
 
         let cells = (0..width * height)
-            .map(|i| {
+            .map(|_i| {
                 // if i % 2 == 0 || i % 7 == 0 {
                 // if [3, 65, 69, 128, 192, 197, 256, 257, 258, 259, 260].contains(&i) {
                 if Math::random() > 0.5 {
