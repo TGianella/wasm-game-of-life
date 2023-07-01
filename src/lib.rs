@@ -26,6 +26,15 @@ pub enum Cell {
     Alive = 1,
 }
 
+impl Cell {
+    fn toggle(&mut self) {
+        *self = match *self {
+            Cell::Dead => Cell::Alive,
+            Cell::Alive => Cell::Dead,
+        };
+    }
+}
+
 #[wasm_bindgen]
 pub struct Universe {
     width: u32,
@@ -104,7 +113,7 @@ impl Universe {
         self.cells = next;
     }
 
-    pub fn new() -> Universe {
+    pub fn new(blank: bool) -> Universe {
         utils::set_panic_hook();
 
         let width = 64;
@@ -114,8 +123,12 @@ impl Universe {
             .map(|_i| {
                 // if i % 2 == 0 || i % 7 == 0 {
                 // if [3, 65, 69, 128, 192, 197, 256, 257, 258, 259, 260].contains(&i) {
-                if Math::random() > 0.5 {
-                    Cell::Alive
+                if !blank {
+                    if Math::random() > 0.5 {
+                        Cell::Alive
+                    } else {
+                        Cell::Dead
+                    }
                 } else {
                     Cell::Dead
                 }
@@ -153,6 +166,11 @@ impl Universe {
 
     pub fn cells(&self) -> *const Cell {
         self.cells.as_ptr()
+    }
+
+    pub fn toggle_cell(&mut self, row: u32, column: u32) {
+        let idx = self.get_index(row, column);
+        self.cells[idx].toggle();
     }
 }
 
